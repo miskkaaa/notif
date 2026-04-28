@@ -69,7 +69,7 @@ jobs:
           import re, sys, os
 
           version = "${{ github.event.inputs.version }}"
-          changelog_path = "changelog.md"
+          changelog_path = "CHANELOG.md"
 
           if not os.path.exists(changelog_path):
               print(f"::error::changelog.md not found.")
