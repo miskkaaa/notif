@@ -1,9 +1,61 @@
 #define NOTIF_API_EXPORT
 #include "includes/notif.hpp"
+#include <algorithm>
 
 using namespace geode::prelude;
 
 namespace notifapi {
+
+    queue* queue::s_instance = nullptr;
+    
+    queue* queue::get() {
+        if (!s_instance) {
+            s_instance = new queue();
+        }
+        return s_instance;
+    }
+    
+    void queue::add(class notif* notification) {
+        m_pending.push(notification);
+        process();
+    }
+    
+    void queue::process() {
+        if (m_processing || m_pending.empty()) {
+            return;
+        }
+        
+        while (!m_pending.empty() && m_active.size() < MAX_CONCURRENT) {
+            auto notification = m_pending.front();
+            m_pending.pop();
+            m_active.push_back(notification);
+            notification->show();
+        }
+    }
+    
+    void queue::done(class notif* notification) {
+        auto it = std::find(m_active.begin(), m_active.end(), notification);
+        if (it != m_active.end()) {
+            m_active.erase(it);
+        }
+        
+        cocos2d::CCDirector::sharedDirector()->getScheduler()->scheduleSelector(
+            schedule_selector(queue::update),
+            this,
+            0.1f,
+            0,
+            0.0f,
+            false
+        );
+    }
+    
+    void queue::update(float dt) {
+        process();
+        cocos2d::CCDirector::sharedDirector()->getScheduler()->unscheduleSelector(
+            schedule_selector(queue::update),
+            this
+        );
+    }
 
     cocos2d::ccColor3B typecolor(const std::string& type) {
         if (type == "info") return {50, 125, 255};
@@ -29,7 +81,7 @@ namespace notifapi {
         return nullptr;
     }
 
-    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound) {
+    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
         if (!cocos2d::CCNodeRGBA::init()) return false;
         
         m_time = time;
@@ -37,6 +89,7 @@ namespace notifapi {
         m_position = position;
         m_animation = animation;
         m_customSound = customSound;
+        m_volume = volume;
         this->setCascadeOpacityEnabled(true);
         
         // mmm calc
@@ -107,9 +160,9 @@ namespace notifapi {
         return true;
     }
     
-    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound) {
+    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
         auto ret = new notif();
-        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound)) {
+        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound, volume)) {
             ret->autorelease();
             return ret;
         }
@@ -167,11 +220,15 @@ namespace notifapi {
         overlay->addChild(this, 9000);
         
         // sound system/notification
-        if (!m_customSound.empty()) {
-            FMODAudioEngine::sharedEngine()->playEffect(m_customSound.c_str(), 1.0f, 1.0f, 1.0f);
-        } else {
-            auto sound = geode::Mod::get()->getResourcesDir() / "notif.ogg";
-            FMODAudioEngine::sharedEngine()->playEffect(sound.string(), 1.0f, 1.0f, 1.0f);
+        auto fmod = FMODAudioEngine::sharedEngine();
+        if (fmod && fmod->getEffectsVolume() > 0.0f) {
+            float finalVolume = m_volume * fmod->getEffectsVolume();
+            if (!m_customSound.empty()) {
+                fmod->playEffect(m_customSound.c_str(), 1.0f, 1.0f, finalVolume);
+            } else {
+                auto sound = geode::Mod::get()->getResourcesDir() / "notif.ogg";
+                fmod->playEffect(sound.string().c_str(), 1.0f, 1.0f, finalVolume);
+            }
         }
         
         cocos2d::CCAction* showAnim = nullptr;
@@ -240,13 +297,18 @@ namespace notifapi {
     }
     
     void notif::hide() {
+        destroyed();
         this->removeFromParent();
     }
     
-    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound) {
-        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound);
+    void notif::destroyed() {
+        queue::get()->done(this);
+    }
+    
+    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
+        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume);
         if (notifObj) {
-            notifObj->show();
+            queue::get()->add(notifObj);
         }
     }
 
