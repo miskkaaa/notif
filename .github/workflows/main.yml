@@ -8,8 +8,6 @@ on:
         required: true
         default: '1.0.2'
   push:
-    tags:
-      - "v*"
     branches:
       - "main"
 
