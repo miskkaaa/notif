@@ -1,12 +1,13 @@
 # notif api for geometry dash
-check out the https://forgejo.hlelo.cc/Miskaa/notif/releases releases page on my friends forgejo page
+check out https://forgejo.hlelo.cc/Miskaa/notif/releases releases page on my friends forgejo page
 ALSO check out mUtils, its on my github :3
 
 If you are not a developer, you dont really need to check this out lol
 
 Enjoy the shitty readme.md file i made when its 11pm/midnight on a school day :3
 
-Look at the forgejo/github page page since im too lazy to make the geode readme better. so enjoy this outdated mess (partially, also its ORIGINALREADME.md on Github)
+Look at the forgejo/github page page since im too lazy to make geode readme better. so enjoy this outdated mess (partially, also its ORIGINALREADME.md on Github)
+
 ## Usage:
 ### Regular:
 In my notif api, theres something called *customizability* (if youre using fancy ofc), theres also predefined functions if youre lazy
@@ -26,26 +27,28 @@ Yes. there's customizability, shockers.
 Check out the screenshots since i set some examples there.
 Header file code:
 ```cpp
-void fnotif(const std::string& text, const std::string& type = "info", float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "");
+void fnotif(const std::string& text, const std::string& type = "info", float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f);
 ```
-Again, if you're dumb, its basically ``notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "");``
+Again, if you're dumb, its basically ``notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "", 0.8f)``
 ```cpp
-notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "");
+notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "", 0.8f);
 
 // example1 is a string, so it can be:
 std::string example1 = "Hello from notif!";
-notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "");
+notifapi::fnotif(example1, "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "", 0.8f);
 // or i guess you can just do this:
-notifapi::fnotif("Hello from notif!", "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f); // no std::string required
+notifapi::fnotif("Hello from notif!", "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "", 0.8f); // no std::string required
 
-// the first 3.0f is the duration, so it can be 6.9f, 6.7f, 1.0f etc.
-// cocos2d::ccColor3B is the RGB color code for the accent bar (aka the thing on the right)
+// first 3.0f is duration, so it can be 6.9f, 6.7f, 1.0f etc.
+// cocos2d::ccColor3B is RGB color code for accent bar (aka thing on the right)
 /*
    Error RGB (ccColor3B) is 255, 50, 50 (as provided in the last error example)
    You can use any other RGB color
 */
 
-// the last 1.0f is the scale, so it can be 0.5f (smaller), 1.5f (bigger), 2.0f (huge) etc.
+// last 1.0f is scale, so it can be 0.5f (smaller), 1.5f (bigger), 2.0f (huge) etc.
+// final 0.8f is volume, so it can be 0.0f (silent), 0.5f (quiet), 1.0f (max) etc.
+// volume respects game sound fx settings, so if game effects sounds are muted, notification sound will be muted too
 ```
 Also, since i included my mUtils project into here. you can do this:
 ```cpp
@@ -67,7 +70,7 @@ To include the notif file, you either put
 ```json
   "dependencies": {
     "geode.node-ids": ">=v1.23.3",
-    "miskaa.notif": ">=1.0.0",
+    "miskaa.notif": ">=1.0.3",
   }
 ```
 in your mod.json file (not supported) \
