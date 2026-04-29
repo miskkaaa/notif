@@ -1,3 +1,6 @@
+## 1.0.3-beta.3
+- delete stuff in mutils
+
 ## 1.0.3-beta.2
 - fix crashes happening on non-ascii user paths
 - remove queue because it doesnt work
