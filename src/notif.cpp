@@ -1,61 +1,10 @@
 #define NOTIF_API_EXPORT
 #include "includes/notif.hpp"
-#include <algorithm>
+#include "includes/mutils/index.hpp"
 
 using namespace geode::prelude;
 
 namespace notifapi {
-
-    queue* queue::s_instance = nullptr;
-    
-    queue* queue::get() {
-        if (!s_instance) {
-            s_instance = new queue();
-        }
-        return s_instance;
-    }
-    
-    void queue::add(class notif* notification) {
-        m_pending.push(notification);
-        process();
-    }
-    
-    void queue::process() {
-        if (m_processing || m_pending.empty()) {
-            return;
-        }
-        
-        while (!m_pending.empty() && m_active.size() < MAX_CONCURRENT) {
-            auto notification = m_pending.front();
-            m_pending.pop();
-            m_active.push_back(notification);
-            notification->show();
-        }
-    }
-    
-    void queue::done(class notif* notification) {
-        auto it = std::find(m_active.begin(), m_active.end(), notification);
-        if (it != m_active.end()) {
-            m_active.erase(it);
-        }
-        
-        cocos2d::CCDirector::sharedDirector()->getScheduler()->scheduleSelector(
-            schedule_selector(queue::update),
-            this,
-            0.1f,
-            0,
-            0.0f,
-            false
-        );
-    }
-    
-    void queue::update(float dt) {
-        process();
-        cocos2d::CCDirector::sharedDirector()->getScheduler()->unscheduleSelector(
-            schedule_selector(queue::update),
-            this
-        );
-    }
 
     cocos2d::ccColor3B typecolor(const std::string& type) {
         if (type == "info") return {50, 125, 255};
@@ -227,7 +176,7 @@ namespace notifapi {
                 fmod->playEffect(m_customSound.c_str(), 1.0f, 1.0f, finalVolume);
             } else {
                 auto sound = geode::Mod::get()->getResourcesDir() / "notif.ogg";
-                fmod->playEffect(sound.string().c_str(), 1.0f, 1.0f, finalVolume);
+                fmod->playEffect(utils::string::pathToString(sound).c_str(), 1.0f, 1.0f, finalVolume);
             }
         }
         
@@ -291,7 +240,6 @@ namespace notifapi {
         this->runAction(cocos2d::CCSequence::create(
             cocos2d::CCDelayTime::create(m_time),
             hideAnim ? hideAnim : cocos2d::CCCallFunc::create(this, callfunc_selector(notif::hide)),
-            cocos2d::CCCallFunc::create(this, callfunc_selector(notif::hide)),
             nullptr
         ));
     }
@@ -302,14 +250,17 @@ namespace notifapi {
     }
     
     void notif::destroyed() {
-        queue::get()->done(this);
     }
     
     void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
         auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume);
         if (notifObj) {
-            queue::get()->add(notifObj);
+            notifObj->show();
         }
+    }
+
+    void notify(const std::string& text, const std::string& type) {
+        fnotif(text, type, 3.0f, {0, 0, 0}, 1.0f, Position::TopRight, Animation::Slide, "");
     }
 
     void info(const std::string& text) { fnotif(text, "info", 3.0f, {0, 0, 0}, 1.0f, Position::TopRight, Animation::Slide, ""); }

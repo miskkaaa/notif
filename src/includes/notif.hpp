@@ -2,8 +2,6 @@
 
 #include <Geode/Geode.hpp>
 #include <Geode/ui/Notification.hpp>
-#include <queue>
-#include <vector>
 
 namespace notifapi {
     class notif;
@@ -29,23 +27,6 @@ namespace notifapi {
     
     void notify(const std::string& text, const std::string& type = "info");
     
-    class queue : public cocos2d::CCObject {
-    private:
-        static queue* s_instance;
-        std::queue<notif*> m_pending;
-        std::vector<notif*> m_active;
-        bool m_processing = false;
-        static const int MAX_CONCURRENT = 3;
-        
-        queue() = default;
-        
-    public:
-        static queue* get();
-        void add(class notif* notification);
-        void process();
-        void done(class notif* notification);
-        void update(float dt);
-    };
     void info(const std::string& text);    // info
     void warn(const std::string& text);    // warning  
     void error(const std::string& text);   // error
