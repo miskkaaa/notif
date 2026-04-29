@@ -26,7 +26,7 @@
     "geode.node-ids": ">=v1.23.3"
   },
   "links": {
-      "source": "https://forgejo.hlelo.cc/Miskaa/notif"
+      "source": "https://github.com/miskkaaa/notif"
   },
   "api": {
     "include": [
