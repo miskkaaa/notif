@@ -47,7 +47,6 @@ namespace notifapi {
         static notif* create(const std::string& text, const std::string& type, float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f);
         void show();
         void hide();
-        void destroyed();
     };
     
     // fancyness
