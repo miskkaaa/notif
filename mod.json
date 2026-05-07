@@ -22,6 +22,7 @@
     "ios": "2.2081"
   },
   "name": "miskaa's notifAPI",
+  "tags": ["api"],
   "dependencies": {
     "geode.node-ids": ">=v1.23.3"
   },
