@@ -1,3 +1,6 @@
+## 1.0.3-beta.7
+- fix mod dot jay son
+
 ## 1.0.3-beta.6
 - fix main.yml
 - sorry erymanthus for saying that the main.yml file at .github/workflows was ai generated (i was very lazy to do that + the only thing i know about yaml is minecraft plugins)
