@@ -51,7 +51,7 @@ notifapi::fnotif("Hello from notif!", "info", 3.0f, cocos2d::ccColor3B{50, 125, 
 // final 0.8f is volume, so it can be 0.0f (silent), 0.5f (quiet), 1.0f (max) etc.
 // volume respects game sound fx settings, so if game effects sounds are muted, notification sound will be muted too
 
-// customIcon: pass any CCNode* to use a custom icon from outside resources, auto-resized to 116x116
+// customIcon: pass any CCNode* to use a custom icon from outside resources, THE BEST if you use a 116x116 icon pls i(MalikHw) didnt know how to force resize to that anyways im a bit bad at coding
 // pass nullptr (or just omit it) to use the default type icon
 auto myIcon = cocos2d::CCSprite::create(Mod::get()->getResourcesDir() / "your-icon.png");
 notifapi::fnotif("Hello from notif!", "info", 3.0f, cocos2d::ccColor3B{50, 125, 255}, 1.0f, notifapi::Position::TopRight, notifapi::Animation::Slide, "", 1.0f, myIcon);
