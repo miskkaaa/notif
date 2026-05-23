@@ -106,10 +106,8 @@ namespace notifapi {
 
         if (icon) {
             icon->setPosition({22 * scale, height/2});
-            if (!customIcon) {
-                // builtin icons stays the same cuz miskaa wants it like that apparently
-                icon->setScale(0.7f * scale);
-            }
+            // nevermind
+            icon->setScale(0.7f * scale);
             this->addChild(icon);
         }
         
