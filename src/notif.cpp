@@ -30,7 +30,7 @@ namespace notifapi {
         return nullptr;
     }
 
-    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
+    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
         if (!cocos2d::CCNodeRGBA::init()) return false;
         
         m_time = time;
@@ -89,10 +89,27 @@ namespace notifapi {
         clipper->addChild(accent);
 
         // icon
-        auto icon = makeIcon(type);
+        cocos2d::CCNode* icon = nullptr;
+        if (customIcon) {
+            icon = customIcon;
+            // auto-resize to 116x116
+            auto cs = icon->getContentSize();
+            if (cs.width > 0 && cs.height > 0) {
+                icon->setScaleX(116.f / cs.width);
+                icon->setScaleY(116.f / cs.height);
+            } else {
+                icon->setScale(1.0f); // fallback
+            }
+        } else {
+            icon = makeIcon(type);
+        }
+
         if (icon) {
             icon->setPosition({22 * scale, height/2});
-            icon->setScale(0.7f * scale);
+            if (!customIcon) {
+                // builtin icons stays the same cuz miskaa wants it like that apparently
+                icon->setScale(0.7f * scale);
+            }
             this->addChild(icon);
         }
         
@@ -109,9 +126,9 @@ namespace notifapi {
         return true;
     }
     
-    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
+    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
         auto ret = new notif();
-        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound, volume)) {
+        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon)) {
             ret->autorelease();
             return ret;
         }
@@ -250,8 +267,8 @@ namespace notifapi {
         this->removeFromParent();
     }
     
-    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume) {
-        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume);
+    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
+        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon);
         if (notifObj) {
             notifObj->show();
         }

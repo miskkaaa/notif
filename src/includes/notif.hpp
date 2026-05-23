@@ -52,13 +52,15 @@ namespace notifapi {
         std::string m_customSound = "";
         float m_volume = 1.0f;
         
-        bool init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume);
+        bool init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon);
     public:
-        static notif* create(const std::string& text, const std::string& type, float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f);
+        // customIcon: pass any CCNode* (CCSprite::create("path/outside/resources.png"))
+        // itll be resized to 116x116, oh yeah pass nullptr to use the built-in type icon.
+        static notif* create(const std::string& text, const std::string& type, float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f, cocos2d::CCNode* customIcon = nullptr);
         void show();
         void hide();
     };
     
     // fancyness
-    NOTIF_API void fnotif(const std::string& text, const std::string& type = "info", float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f);
+    NOTIF_API void fnotif(const std::string& text, const std::string& type = "info", float time = 3.0f, cocos2d::ccColor3B accentColor = {0, 0, 0}, float scale = 1.0f, Position position = Position::TopRight, Animation animation = Animation::Slide, const std::string& customSound = "", float volume = 1.0f, cocos2d::CCNode* customIcon = nullptr);
 }
