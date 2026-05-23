@@ -2,11 +2,6 @@ name: Build Geode Mod
 
 on:
   workflow_dispatch:
-    inputs:
-      version:
-        description: 'Release version'
-        required: true
-        default: '1.0.2'
   push:
     branches:
       - "main"
@@ -70,45 +65,37 @@ jobs:
         run: |
           python3 - <<'EOF'
           import re, sys, os
-
-          # Fix 2: Fallback to branch/tag name if manual input is empty
-          version = "${{ github.event.inputs.version }}" or "${{ github.ref_name }}"
-          # Clean 'v' prefix so 'v1.0.2' matches '## 1.0.2' in changelog.md
-          version = version.lstrip('v')
-          
           changelog_path = "changelog.md"
-
           if not os.path.exists(changelog_path):
               print(f"::error::changelog.md not found.")
               sys.exit(1)
-
           with open(changelog_path, "r", encoding="utf-8") as f:
-              changelog = f.read()
-
-          # Finds the section under the version header and stops at the next header
-          pattern = rf"(?m)^## {re.escape(version)}\n(.*?)(?=^## |\Z)"
-          match = re.search(pattern, changelog, re.DOTALL)
-
-          if not match:
-              print(f"::error::Changelog entry for '{version}' not found in changelog.md")
+              content = f.read()
+          # grab first ##
+          m = re.search(r"^## (.+)", content, re.MULTILINE)
+          if not m:
+              print("::error::No version header found in changelog.md")
               sys.exit(1)
-
+          version = m.group(1).strip()
+          pattern = rf"(?m)^## {re.escape(version)}\n(.*?)(?=^## |\Z)"
+          match = re.search(pattern, content, re.DOTALL)
+          if not match:
+              print(f"::error::Could not extract changelog body for '{version}'")
+              sys.exit(1)
           section = match.group(1).strip()
-          
-          # Optional: Converts Geode color tags to bold for GitHub Release view
           section = re.sub(r"<c[a-zA-Z]>", "**", section)
           section = re.sub(r"</c>", "**", section)
-
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as f:
+              f.write(f"version={version}\n")
               f.write(f"changelog<<__CHANGELOG_EOF__\n{section}\n__CHANGELOG_EOF__\n")
           EOF
-
+          
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
           # Fix 3: Ensure name and tag are never empty
-          name: ${{ github.event.inputs.version || github.ref_name }}
-          tag_name: ${{ github.event.inputs.version || github.ref_name }}
+          name: ${{ steps.changelog.outputs.version }}
+          tag_name: ${{ steps.changelog.outputs.version }}
           body: ${{ steps.changelog.outputs.changelog }}
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
