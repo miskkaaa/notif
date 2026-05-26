@@ -1,6 +1,7 @@
 #define NOTIF_API_EXPORT
 #include "includes/notif.hpp"
 #include "includes/mutils/index.hpp"
+// no include "includes/BlurAPI.hpp" cuz notif.hpp ALREADY includes it so what the fuck
 
 using namespace geode::prelude;
 
@@ -30,7 +31,7 @@ namespace notifapi {
         return nullptr;
     }
 
-    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
+    bool notif::init(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon, bool blur, int blurPasses) {
         if (!cocos2d::CCNodeRGBA::init()) return false;
         
         m_time = time;
@@ -39,6 +40,8 @@ namespace notifapi {
         m_animation = animation;
         m_customSound = customSound;
         m_volume = volume;
+        m_blur = blur;
+        m_blurPasses = blurPasses;
         this->setCascadeOpacityEnabled(true);
         
         // mmm calc
@@ -121,12 +124,20 @@ namespace notifapi {
         this->addChild(label);
         
         this->setContentSize({width, height});
+
+        // // blur thanks thesillydoggo
+        if (m_blur && BlurAPI::isBlurAPIEnabled() && !geode::Mod::get()->getSettingValue<bool>("disable-blur")) {
+            BlurAPI::addBlur(this);
+            auto opts = BlurAPI::getOptions(this);
+            if (opts) opts->passes = m_blurPasses;
+        }
+
         return true;
     }
     
-    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
+    class notif* notif::create(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon, bool blur, int blurPasses) {
         auto ret = new notif();
-        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon)) {
+        if (ret && ret->init(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon, blur, blurPasses)) {
             ret->autorelease();
             return ret;
         }
@@ -265,8 +276,8 @@ namespace notifapi {
         this->removeFromParent();
     }
     
-    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon) {
-        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon);
+    void fnotif(const std::string& text, const std::string& type, float time, cocos2d::ccColor3B accentColor, float scale, Position position, Animation animation, const std::string& customSound, float volume, cocos2d::CCNode* customIcon, bool blur, int blurPasses) {
+        auto notifObj = notif::create(text, type, time, accentColor, scale, position, animation, customSound, volume, customIcon, blur, blurPasses);
         if (notifObj) {
             notifObj->show();
         }

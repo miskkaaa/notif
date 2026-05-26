@@ -1,7 +1,7 @@
 {
   "geode": "5.7.0",
   "developers": ["miskaa", "MalikHw47"],
-  "version": "v1.0.4-beta.4",
+  "version": "v1.0.5-beta",
   "description": "cool notification api its so cool",
   "resources": {
     "sprites": [
@@ -24,7 +24,8 @@
   "name": "miskaa's notifAPI",
   "tags": ["api"],
   "dependencies": {
-    "geode.node-ids": ">=v1.23.3"
+    "geode.node-ids": ">=v1.23.3",
+    "thesillydoggo.blur-api": ">=v1.0.0"
   },
   "links": {
       "source": "https://github.com/miskkaaa/notif"
@@ -34,5 +35,13 @@
       "src/includes/*.hpp",
       "src/includes/**/*.hpp"
     ]
+  },
+  "settings": {
+    "disable-blur": {
+      "type": "bool",
+      "default": false,
+      "name": "disable blur ENTIRELY",
+      "description": "Disables blur effects. good for low-end devices."
+    }
   }
 }

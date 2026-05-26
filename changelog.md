@@ -1,3 +1,6 @@
+## v1.0.5-beta
+- added Blur!
+
 ## 1.0.4-beta.4
 - added custom image setting to api (by [MalikHw47](https://www.youtube.com/@MalikHw47/))
 
